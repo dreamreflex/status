@@ -40,18 +40,6 @@ const workerConfig: WorkerConfig = {
       headers: {
         'User-Agent': 'Uptimeflare',
       },
-      // [OPTIONAL] body to be sent (require POST/PUT/PATCH method)
-      // body: 'Hello, world!',
-      // [OPTIONAL] if specified, the response must contains the keyword to be considered as operational.
-      // responseKeyword: 'success',
-      // [OPTIONAL] if specified, the response must NOT contains the keyword to be considered as operational.
-      // responseForbiddenKeyword: 'bad gateway',
-      // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
-      // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
-      // currently supports `worker://`, `globalping://` and `http(s)://` proxies
-      // checkProxy: 'worker://weur',
-      // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
-      // checkProxyFallback: true,
     },
     {
       id: 'dreamreflex_csa',
@@ -85,28 +73,21 @@ const workerConfig: WorkerConfig = {
     }
   ]
 }
-
-// You can define multiple maintenances here
-// During maintenance, an alert will be shown at status page
-// Also, related downtime notifications will be skipped (if any)
-// Of course, you can leave it empty if you don't need this feature
-
-// const maintenances: MaintenanceConfig[] = []
-
 const maintenances: MaintenanceConfig[] = [
     {
-    // [Optional] Monitor IDs to be affected by this maintenance
     monitors: ['dreamreflex_doc'],
-    // [Optional] default to "Scheduled Maintenance" if not specified
     title: '站点缓存维护-降级',
-    // Description of the maintenance, will be shown at status page
     body: '文档站点因缓存维护降级',
-    // Start time of the maintenance, in UNIX timestamp or ISO 8601 format
     start: '2025-11-07T00:20:00+08:00',
-    // [Optional] end time of the maintenance, in UNIX timestamp or ISO 8601 format
-    // if not specified, the maintenance will be considered as on-going
     end: '2025-11-07T00:22:00+08:00',
-    // [Optional] color of the maintenance alert at status page, default to "yellow"
+    color: 'blue',
+  },
+  {
+    monitors: ['dreamreflex-api'],
+    title: 'API安全升级',
+    body: '处理了披露出来的CVE安全告警，将会对项目进行安全升级',
+    start: '2025-11-08T15:00:00+08:00',
+    end:   '2025-11-08T17:00:00+08:00',
     color: 'blue',
   },
 ]
