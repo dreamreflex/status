@@ -1,45 +1,22 @@
-// This is a simplified example config file for quickstart
-// Some not frequently used features are omitted/commented out here
-// For a full-featured example, please refer to `uptime.config.full.ts`
-
-// Don't edit this line
 import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
-
 const pageConfig: PageConfig = {
-  // Title for your status page
   title: "云梦镜像状态",
-  // Links shown at the header of your status page, could set `highlight` to `true`
   links: [
     { link: 'https://dreamreflex.com', label: '官网' },
     { link: 'mailto:status@dreamreflex.com', label: '报告问题', highlight: true },
   ],
 }
-
 const workerConfig: WorkerConfig = {
-  // Define all your monitors here
   monitors: [
-    // Example HTTP Monitor
     {
-      // `id` should be unique, history will be kept if the `id` remains constant
       id: 'dreamreflex_owa',
-      // `name` is used at status page and callback message
       name: '官方网站',
-      // `method` should be a valid HTTP Method
       method: 'GET',
-      // `target` is a valid URL
       target: 'https://dreamreflex.com',
-      // [OPTIONAL] `tooltip` is ONLY used at status page to show a tooltip
       tooltip: '官方网站的运行状态',
-      // [OPTIONAL] `statusPageLink` is ONLY used for clickable link at status page
       statusPageLink: 'https://dreamreflex.com',
-      // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
       expectedCodes: [200],
-      // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
       timeout: 10000,
-      // [OPTIONAL] headers to be sent
-      headers: {
-        'User-Agent': 'Uptimeflare',
-      },
     },
     {
       id: 'dreamreflex_csa',
@@ -83,7 +60,7 @@ const maintenances: MaintenanceConfig[] = [
     color: 'blue',
   },
   {
-    monitors: ['dreamreflex-api'],
+    monitors: ['dreamreflex_api'],
     title: 'API安全升级',
     body: '处理了披露出来的CVE安全告警，将会对项目进行安全升级',
     start: '2025-11-08T15:00:00+08:00',
@@ -91,6 +68,4 @@ const maintenances: MaintenanceConfig[] = [
     color: 'blue',
   },
 ]
-
-// Don't edit this line
 export { maintenances, pageConfig, workerConfig }
