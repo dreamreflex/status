@@ -3,6 +3,7 @@ const pageConfig: PageConfig = {
   title: "云梦镜像状态",
   links: [
     { link: 'https://dreamreflex.com', label: '官网' },
+    { link: 'https://github.com/dreamreflex/status/wiki/History-Maintenance-Event', label: '历史维护'}
     { link: 'mailto:status@dreamreflex.com', label: '报告问题', highlight: true },
   ],
 }
@@ -72,7 +73,7 @@ const maintenances: MaintenanceConfig[] = [
     title: 'API功能升级',
     body: '升级API能力与CSA服务适配，将会在迁移过程中出现不可用的情况',
     start: '2025-11-09T14:00:00+08:00',
-    end:   '2025-11-09T15:00:00+08:00',
+    end:   '2025-11-09T14:15:00+08:00',
     color: 'blue',
   },
 ]
