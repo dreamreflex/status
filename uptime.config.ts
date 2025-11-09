@@ -3,7 +3,7 @@ const pageConfig: PageConfig = {
   title: "云梦镜像状态",
   links: [
     { link: 'https://dreamreflex.com', label: '官网' },
-    { link: 'https://github.com/dreamreflex/status/wiki/History-Maintenance-Event', label: '历史维护'}
+    { link: 'https://github.com/dreamreflex/status/wiki/History-Maintenance-Event', label: '历史维护'},
     { link: 'mailto:status@dreamreflex.com', label: '报告问题', highlight: true },
   ],
 }
