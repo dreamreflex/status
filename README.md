@@ -7,3 +7,7 @@ According to the relevant requirements of the SLA, the status page needs to be o
 ## About subscribing to this status page
 
 The public status page is only for maintaining leads and external clients. If your service (or products) requires status monitoring, we will establish a separate and comprehensive status monitoring system based on your project. Puiblic status page are unnecessary. 
+
+## Credit
+
+thanks to https://github.com/lyc8503/UptimeFlare
