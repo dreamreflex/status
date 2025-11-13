@@ -86,5 +86,13 @@ const maintenances: MaintenanceConfig[] = [
     end:   '2025-11-09T14:15:00+08:00',
     color: 'blue',
   },
+   {
+    monitors: ['dreamreflex_api'],
+    title: 'API功能升级',
+    body: '升级API的公钥基础设施能力和OAuth标准流程认证能力',
+    start: '2025-11-13T20:00:00+08:00',
+    end:   '2025-11-14T20:15:00+08:00',
+    color: 'blue',
+  },
 ]
 export { maintenances, pageConfig, workerConfig }
