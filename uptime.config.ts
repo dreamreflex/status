@@ -91,8 +91,16 @@ const maintenances: MaintenanceConfig[] = [
     title: 'API功能升级',
     body: '升级API的公钥基础设施能力和OAuth标准流程认证能力，对API加入异构零信任网络进行封闭测试和合规检验，此次维护期间PKI，IaS平台将不可用，预计升级于2025年11月18日结束。',
     start: '2025-11-13T20:00:00+08:00',
-    end:   '2025-11-18T20:15:00+08:00',
+    end:   '2025-11-18T18:15:00+08:00',
     color: 'blue',
   },
+    {
+    monitors: ['dreamreflex_csa','dreamreflex_api','dreamreflex_doc','dreamreflex_owa'],
+    title: '第三方服务降级',
+    body: '我们已经确定目前的问题来源于第三方服务，接下来我们会持续更新',
+    start: '2025-11-18T21:00:00+08:00',
+    end:   '2025-11-19T08:00:00+08:00',
+    color: 'blue',
+  }
 ]
 export { maintenances, pageConfig, workerConfig }
