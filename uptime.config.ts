@@ -94,12 +94,12 @@ const maintenances: MaintenanceConfig[] = [
     end:   '2025-11-18T18:15:00+08:00',
     color: 'blue',
   },
-    {
+  {
     monitors: ['dreamreflex_csa','dreamreflex_api','dreamreflex_doc','dreamreflex_owa'],
     title: '第三方服务降级',
     body: '我们已经确定目前的问题来源于第三方服务，接下来我们会持续更新',
     start: '2025-11-18T21:00:00+08:00',
-    end:   '2025-11-19T08:00:00+08:00',
+    end:   '2025-11-19T23:40:00+08:00',
     color: 'blue',
   }
 ]
