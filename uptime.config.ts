@@ -53,9 +53,9 @@ const workerConfig: WorkerConfig = {
       id: 'dreamreflex_pki',
       name: '公钥基础设施在线服务',
       method: 'GET',
-      target: 'https://api.dreamreflex.com/api/pki/status',
+      target: 'https://pki.dreamreflex.com/api/v1/ca',
       tooltip: 'CSA客户服务应用网站的运行状态',
-      statusPageLink: 'https://platform.dreamreflex.com',
+      statusPageLink: 'https://pki.dreamreflex.com/api/v1/ca',
       expectedCodes: [200],
       timeout: 10000,
     }
