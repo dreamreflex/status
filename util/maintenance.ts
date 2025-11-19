@@ -1,12 +1,10 @@
 import type { MaintenanceConfig } from '@/types/config'
 
-const DEFAULT_OWNER = process.env.NEXT_PUBLIC_MAINTENANCE_REPO_OWNER || 'dreamreflex'
-const DEFAULT_REPO = process.env.NEXT_PUBLIC_MAINTENANCE_REPO_NAME || 'status'
-const DEFAULT_BRANCH = process.env.NEXT_PUBLIC_MAINTENANCE_REPO_BRANCH || 'main'
-const DEFAULT_INDEX =
-  process.env.NEXT_PUBLIC_MAINTENANCE_INDEX || 'maintenance/index.md'
-const DEFAULT_REF = `refs/heads/${DEFAULT_BRANCH}`
-
+// 这里不再使用环境变量注入，仓库信息固定为当前开源仓库
+const OWNER = 'dreamreflex'
+const REPO = 'status'
+const REF = 'refs/heads/main'
+const INDEX_PATH = 'maintenance/index.md'
 const RAW_BASE = 'https://raw.githubusercontent.com'
 
 function parseFrontMatter(
@@ -136,18 +134,14 @@ function parseMaintenanceMarkdown(
 }
 
 async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
-  const owner = DEFAULT_OWNER
-  const repo = DEFAULT_REPO
-  const ref = DEFAULT_REF
-  const indexPath = DEFAULT_INDEX
   const indexDir =
-    indexPath.lastIndexOf('/') >= 0
-      ? indexPath.slice(0, indexPath.lastIndexOf('/'))
+    INDEX_PATH.lastIndexOf('/') >= 0
+      ? INDEX_PATH.slice(0, INDEX_PATH.lastIndexOf('/'))
       : ''
 
-  const indexUrl = `${RAW_BASE}/${encodeURIComponent(owner)}/${encodeURIComponent(
-    repo
-  )}/${encodeURIComponent(ref)}/${indexPath}`
+  const indexUrl = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
+    REPO
+  )}/${encodeURIComponent(REF)}/${INDEX_PATH}`
 
   let indexContent = ''
   try {
@@ -185,9 +179,9 @@ async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
   const maintenances: MaintenanceConfig[] = []
 
   for (const path of filePaths) {
-    const url = `${RAW_BASE}/${encodeURIComponent(owner)}/${encodeURIComponent(
-      repo
-    )}/${encodeURIComponent(ref)}/${path}`
+    const url = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
+      REPO
+    )}/${encodeURIComponent(REF)}/${path}`
     try {
       const resp = await fetch(url, {
         headers: { 'User-Agent': 'UptimeFlare-Maintenance' },
