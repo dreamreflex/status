@@ -139,9 +139,11 @@ async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
       ? INDEX_PATH.slice(0, INDEX_PATH.lastIndexOf('/'))
       : ''
 
+  // 注意：REF 中包含斜杠（refs/heads/main），不能对整个 REF 做 encodeURIComponent，
+  // 否则斜杠会被编码成 %2F，raw.githubusercontent.com 将无法正确解析到分支引用。
   const indexUrl = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
     REPO
-  )}/${encodeURIComponent(REF)}/${INDEX_PATH}`
+  )}/${REF}/${INDEX_PATH}`
 
   let indexContent = ''
   try {
@@ -181,7 +183,7 @@ async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
   for (const path of filePaths) {
     const url = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
       REPO
-    )}/${encodeURIComponent(REF)}/${path}`
+    )}/${REF}/${path}`
     try {
       const resp = await fetch(url, {
         headers: { 'User-Agent': 'UptimeFlare-Maintenance' },

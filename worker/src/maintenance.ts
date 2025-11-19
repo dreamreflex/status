@@ -133,9 +133,10 @@ function parseMaintenanceMarkdownWorker(
 }
 
 async function fetchMaintenancesFromGithubOnceWorker(): Promise<MaintenanceConfig[]> {
+  // 同前端逻辑：REF 中包含斜杠，不能整体 encodeURIComponent
   const indexUrl = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
     REPO
-  )}/${encodeURIComponent(REF)}/${INDEX_PATH}`
+  )}/${REF}/${INDEX_PATH}`
 
   let indexContent = ''
   try {
@@ -183,7 +184,7 @@ async function fetchMaintenancesFromGithubOnceWorker(): Promise<MaintenanceConfi
   for (const path of filePaths) {
     const url = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
       REPO
-    )}/${encodeURIComponent(REF)}/${path}`
+    )}/${REF}/${path}`
     try {
       const resp = await fetch(url, {
         headers: { 'User-Agent': 'UptimeFlare-Maintenance-Worker' },
