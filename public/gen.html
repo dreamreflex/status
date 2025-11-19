@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>维护事件 Markdown 生成器</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.5;
+        background-color: #f7fafc;
+        color: #1a202c;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .page-subtitle {
+        margin: 0;
+        font-size: 13px;
+        color: #4a5568;
+      }
+      .page-meta {
+        font-size: 11px;
+        color: #718096;
+        text-align: right;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        gap: 16px;
+      }
+      @media (max-width: 768px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      section {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background-color: #ffffff;
+        padding: 16px;
+      }
+      .section-title {
+        margin: 0 0 4px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .section-subtitle {
+        margin: 0 0 12px;
+        font-size: 12px;
+        color: #718096;
+      }
+      .field {
+        margin-bottom: 10px;
+      }
+      .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .field small {
+        font-weight: normal;
+        color: #718096;
+        font-size: 11px;
+      }
+      input[type='text'],
+      input[type='datetime-local'],
+      select,
+      textarea {
+        width: 100%;
+        padding: 6px 8px;
+        font-size: 13px;
+        border-radius: 4px;
+        border: 1px solid #cbd5e0;
+        outline: none;
+        background-color: #fff;
+      }
+      input[type='text']:focus,
+      input[type='datetime-local']:focus,
+      select:focus,
+      textarea:focus {
+        border-color: #3182ce;
+        box-shadow: 0 0 0 1px rgba(49, 130, 206, 0.3);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 140px;
+      }
+      .inline-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .inline-row > * {
+        flex: 1;
+      }
+      .inline-row select {
+        max-width: 110px;
+        flex: 0 0 auto;
+      }
+      .hint {
+        margin-top: 2px;
+        font-size: 11px;
+        color: #a0aec0;
+      }
+      .actions {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+      button {
+        padding: 6px 12px;
+        font-size: 13px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        background-color: #3182ce;
+        color: #fff;
+      }
+      button.secondary {
+        background-color: #ffffff;
+        color: #2d3748;
+        border-color: #cbd5e0;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+          'Courier New', monospace;
+        font-size: 11px;
+        background-color: #edf2f7;
+        padding: 1px 3px;
+        border-radius: 3px;
+      }
+      #output {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+          'Courier New', monospace;
+        font-size: 12px;
+        min-height: 220px;
+        white-space: pre;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="page-header">
+        <div>
+          <h1>维护事件 Markdown 生成器</h1>
+          <p class="page-subtitle">
+            填写表单后自动生成可直接保存到 <code>maintenance/*.md</code> 的内容。
+          </p>
+        </div>
+        <div class="page-meta">
+          <div>本地工具页面，独立于状态页应用逻辑</div>
+          <div>访问路径：<code>/gen.html</code></div>
+        </div>
+      </header>
+
+      <div class="layout">
+        <!-- 左侧表单 -->
+        <section>
+          <p class="section-title">填写维护信息</p>
+          <p class="section-subtitle">必填字段为标题、监控 ID、开始时间。</p>
+          <form id="maintenance-form">
+            <div class="field">
+              <label for="title">
+                标题 <small>（title）</small>
+              </label>
+              <input id="title" type="text" placeholder="例如：API 维护事件" />
+            </div>
+
+            <div class="field">
+              <label for="monitors">
+                监控 ID 列表 <small>（monitors，逗号分隔）</small>
+              </label>
+              <input
+                id="monitors"
+                type="text"
+                placeholder="例如：dreamreflex_api,dreamreflex_csa"
+              />
+              <div class="hint">
+                必须与 <code>uptime.config.ts</code> 中的 monitor <code>id</code> 一致。
+              </div>
+            </div>
+
+            <div class="field">
+              <label>
+                开始时间 <small>（start，本地时间）</small>
+              </label>
+              <div class="inline-row">
+                <input id="start" type="datetime-local" />
+                <select id="start-tz">
+                  <option value="+08:00">+08:00（中国）</option>
+                  <option value="+00:00">+00:00（UTC）</option>
+                </select>
+              </div>
+              <div class="hint">
+                将生成形如 <code>2025-11-20T08:00:00+08:00</code> 的字符串。
+              </div>
+            </div>
+
+            <div class="field">
+              <label>
+                结束时间 <small>（end，可选）</small>
+              </label>
+              <div class="inline-row">
+                <input id="end" type="datetime-local" />
+                <select id="end-tz">
+                  <option value="+08:00">+08:00（中国）</option>
+                  <option value="+00:00">+00:00（UTC）</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="color">
+                颜色 <small>（color，Mantine 颜色名）</small>
+              </label>
+              <select id="color">
+                <option value="blue">blue（默认）</option>
+                <option value="red">red</option>
+                <option value="yellow">yellow</option>
+                <option value="orange">orange</option>
+                <option value="green">green</option>
+                <option value="teal">teal</option>
+                <option value="cyan">cyan</option>
+                <option value="indigo">indigo</option>
+                <option value="violet">violet</option>
+                <option value="grape">grape</option>
+                <option value="pink">pink</option>
+                <option value="gray">gray</option>
+                <option value="dark">dark</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="status">
+                状态 <small>（status）</small>
+              </label>
+              <select id="status">
+                <option value="planned">planned（计划中）</option>
+                <option value="ongoing">ongoing（进行中）</option>
+                <option value="completed" selected>completed（已完成）</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="id">
+                事件 ID（可选） <small>（id，便于追踪）</small>
+              </label>
+              <input id="id" type="text" placeholder="例如：20251120-api-maint" />
+            </div>
+
+            <div class="field">
+              <label for="body">
+                正文 <small>（body）</small>
+              </label>
+              <textarea
+                id="body"
+                placeholder="描述本次维护的内容、影响范围等。支持多行文本。"
+              ></textarea>
+            </div>
+
+            <div class="actions">
+              <button type="submit">生成 Markdown</button>
+              <button type="button" id="copy-btn" class="secondary" disabled>
+                复制到剪贴板
+              </button>
+              <span class="hint">
+                生成后，将内容保存为 <code>maintenance/xxxxxx-update.md</code>，并在
+                <code>maintenance/index.md</code> 中追加文件名即可。
+              </span>
+            </div>
+          </form>
+        </section>
+
+        <!-- 右侧输出 -->
+        <section>
+          <p class="section-title">预览 / 输出</p>
+          <p class="section-subtitle">生成的 Markdown 将显示在这里，可直接复制使用。</p>
+          <textarea id="output" readonly></textarea>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      function formatDateTime(dtValue, tz) {
+        if (!dtValue) return '';
+        var d = new Date(dtValue);
+        if (isNaN(d.getTime())) return '';
+        function pad(n) {
+          return n < 10 ? '0' + n : '' + n;
+        }
+        var year = d.getFullYear();
+        var month = pad(d.getMonth() + 1);
+        var day = pad(d.getDate());
+        var hour = pad(d.getHours());
+        var minute = pad(d.getMinutes());
+        var second = pad(d.getSeconds());
+        return (
+          year +
+          '-' +
+          month +
+          '-' +
+          day +
+          'T' +
+          hour +
+          ':' +
+          minute +
+          ':' +
+          second +
+          tz
+        );
+      }
+
+      var form = document.getElementById('maintenance-form');
+      var output = document.getElementById('output');
+      var copyBtn = document.getElementById('copy-btn');
+
+      function generateMarkdown() {
+        var title = document.getElementById('title').value.trim();
+        var monitorsRaw = document.getElementById('monitors').value.trim();
+        var startValue = document.getElementById('start').value;
+        var startTz = document.getElementById('start-tz').value;
+        var endValue = document.getElementById('end').value;
+        var endTz = document.getElementById('end-tz').value;
+        var color = document.getElementById('color').value;
+        var status = document.getElementById('status').value;
+        var idValue = document.getElementById('id').value.trim();
+        var body = document.getElementById('body').value.trim();
+
+        var monitorsList = [];
+        if (monitorsRaw) {
+          monitorsRaw.split(',').forEach(function (v) {
+            var t = v.trim();
+            if (t) monitorsList.push(t);
+          });
+        }
+        var monitorsLine = monitorsList.length
+          ? 'monitors: [' + monitorsList.join(',') + ']'
+          : '';
+
+        var startStr = formatDateTime(startValue, startTz);
+        var endStr = formatDateTime(endValue, endTz);
+
+        var lines = [];
+        lines.push('---');
+        if (title) lines.push('title: ' + title);
+        if (monitorsLine) lines.push(monitorsLine);
+        if (startStr) lines.push('start: ' + startStr);
+        if (endStr) lines.push('end: ' + endStr);
+        if (color) lines.push('color: ' + color);
+        if (status) lines.push('status: ' + status);
+        lines.push('type: maintenance');
+        if (idValue) lines.push('id: ' + idValue);
+        lines.push('---');
+        lines.push('');
+        if (body) lines.push(body);
+
+        var md = lines.join('\n');
+        output.value = md;
+        copyBtn.disabled = !md.trim();
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        generateMarkdown();
+      });
+
+      copyBtn.addEventListener('click', function () {
+        if (!output.value) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(output.value);
+        } else {
+          output.select();
+          document.execCommand('copy');
+        }
+      });
+
+      // 简单的交互优化：输入改变时自动更新预览
+      Array.prototype.forEach.call(
+        document.querySelectorAll(
+          '#maintenance-form input, #maintenance-form select, #maintenance-form textarea'
+        ),
+        function (el) {
+          el.addEventListener('change', generateMarkdown);
+        }
+      );
+
+      // 默认填入当前时间到开始时间，方便快速生成
+      (function presetNow() {
+        var startInput = document.getElementById('start');
+        if (!startInput.value) {
+          var now = new Date();
+          var y = now.getFullYear();
+          var m = ('0' + (now.getMonth() + 1)).slice(-2);
+          var d = ('0' + now.getDate()).slice(-2);
+          var hh = ('0' + now.getHours()).slice(-2);
+          var mm = ('0' + now.getMinutes()).slice(-2);
+          startInput.value = y + '-' + m + '-' + d + 'T' + hh + ':' + mm;
+        }
+      })();
+    </script>
+  </body>
+</html>
