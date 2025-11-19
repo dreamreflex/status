@@ -32,6 +32,7 @@ function getStatusTextColor(state: MonitorState, ids: string[]) {
 export default function MonitorList({
   monitors,
   state,
+  maintenances,
 }: {
   monitors: MonitorTarget[]
   state: MonitorState
