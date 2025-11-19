@@ -3,6 +3,7 @@ import type { MaintenanceConfig } from '../../types/config'
 const OWNER = 'dreamreflex'
 const REPO = 'status'
 const BRANCH = 'main'
+const REF = `refs/heads/${BRANCH}`
 const INDEX_PATH = 'maintenance/index.md'
 const RAW_BASE = 'https://raw.githubusercontent.com'
 
@@ -134,7 +135,7 @@ function parseMaintenanceMarkdownWorker(
 async function fetchMaintenancesFromGithubOnceWorker(): Promise<MaintenanceConfig[]> {
   const indexUrl = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
     REPO
-  )}/${encodeURIComponent(BRANCH)}/${INDEX_PATH}`
+  )}/${encodeURIComponent(REF)}/${INDEX_PATH}`
 
   let indexContent = ''
   try {
@@ -182,7 +183,7 @@ async function fetchMaintenancesFromGithubOnceWorker(): Promise<MaintenanceConfi
   for (const path of filePaths) {
     const url = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
       REPO
-    )}/${encodeURIComponent(BRANCH)}/${path}`
+    )}/${encodeURIComponent(REF)}/${path}`
     try {
       const resp = await fetch(url, {
         headers: { 'User-Agent': 'UptimeFlare-Maintenance-Worker' },

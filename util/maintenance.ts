@@ -5,6 +5,7 @@ const DEFAULT_REPO = process.env.NEXT_PUBLIC_MAINTENANCE_REPO_NAME || 'status'
 const DEFAULT_BRANCH = process.env.NEXT_PUBLIC_MAINTENANCE_REPO_BRANCH || 'main'
 const DEFAULT_INDEX =
   process.env.NEXT_PUBLIC_MAINTENANCE_INDEX || 'maintenance/index.md'
+const DEFAULT_REF = `refs/heads/${DEFAULT_BRANCH}`
 
 const RAW_BASE = 'https://raw.githubusercontent.com'
 
@@ -137,7 +138,7 @@ function parseMaintenanceMarkdown(
 async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
   const owner = DEFAULT_OWNER
   const repo = DEFAULT_REPO
-  const branch = DEFAULT_BRANCH
+  const ref = DEFAULT_REF
   const indexPath = DEFAULT_INDEX
   const indexDir =
     indexPath.lastIndexOf('/') >= 0
@@ -146,7 +147,7 @@ async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
 
   const indexUrl = `${RAW_BASE}/${encodeURIComponent(owner)}/${encodeURIComponent(
     repo
-  )}/${encodeURIComponent(branch)}/${indexPath}`
+  )}/${encodeURIComponent(ref)}/${indexPath}`
 
   let indexContent = ''
   try {
@@ -186,7 +187,7 @@ async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
   for (const path of filePaths) {
     const url = `${RAW_BASE}/${encodeURIComponent(owner)}/${encodeURIComponent(
       repo
-    )}/${encodeURIComponent(branch)}/${path}`
+    )}/${encodeURIComponent(ref)}/${path}`
     try {
       const resp = await fetch(url, {
         headers: { 'User-Agent': 'UptimeFlare-Maintenance' },
