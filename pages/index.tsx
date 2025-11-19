@@ -104,16 +104,26 @@ export async function getServerSideProps() {
 
   // Only present these values to client
   const monitors = workerConfig.monitors.map((monitor) => {
-    return {
+    const base: any = {
       id: monitor.id,
       name: monitor.name,
-      // @ts-ignore
-      tooltip: monitor?.tooltip,
-      // @ts-ignore
-      statusPageLink: monitor?.statusPageLink,
-      // @ts-ignore
-      hideLatencyChart: monitor?.hideLatencyChart,
     }
+
+    // 仅在有值时再添加可选字段，避免 undefined 进入 JSON
+    if (monitor.tooltip) {
+      // @ts-ignore
+      base.tooltip = monitor.tooltip
+    }
+    if (monitor.statusPageLink) {
+      // @ts-ignore
+      base.statusPageLink = monitor.statusPageLink
+    }
+    if (typeof monitor.hideLatencyChart === 'boolean') {
+      // @ts-ignore
+      base.hideLatencyChart = monitor.hideLatencyChart
+    }
+
+    return base
   })
 
   return { props: { state, monitors } }
