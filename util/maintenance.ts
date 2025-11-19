@@ -1,18 +1,12 @@
 import type { MaintenanceConfig } from '@/types/config'
 
-type GitHubContentItem = {
-  name: string
-  path: string
-  type: string
-  download_url?: string
-}
-
 const DEFAULT_OWNER = process.env.NEXT_PUBLIC_MAINTENANCE_REPO_OWNER || 'dreamreflex'
 const DEFAULT_REPO = process.env.NEXT_PUBLIC_MAINTENANCE_REPO_NAME || 'status'
 const DEFAULT_BRANCH = process.env.NEXT_PUBLIC_MAINTENANCE_REPO_BRANCH || 'main'
-const DEFAULT_DIR = process.env.NEXT_PUBLIC_MAINTENANCE_DIR || 'maintenance'
+const DEFAULT_INDEX =
+  process.env.NEXT_PUBLIC_MAINTENANCE_INDEX || 'maintenance/index.md'
 
-const API_BASE = 'https://api.github.com'
+const RAW_BASE = 'https://raw.githubusercontent.com'
 
 function parseFrontMatter(
   raw: string
@@ -140,56 +134,67 @@ function parseMaintenanceMarkdown(
   return maintenance
 }
 
-async function fetchGitHubMaintenanceFiles(): Promise<GitHubContentItem[]> {
+async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
   const owner = DEFAULT_OWNER
   const repo = DEFAULT_REPO
   const branch = DEFAULT_BRANCH
-  const dir = DEFAULT_DIR
+  const indexPath = DEFAULT_INDEX
+  const indexDir =
+    indexPath.lastIndexOf('/') >= 0
+      ? indexPath.slice(0, indexPath.lastIndexOf('/'))
+      : ''
 
-  const url = `${API_BASE}/repos/${encodeURIComponent(
-    owner
-  )}/${encodeURIComponent(repo)}/contents/${encodeURIComponent(
-    dir
-  )}?ref=${encodeURIComponent(branch)}`
+  const indexUrl = `${RAW_BASE}/${encodeURIComponent(owner)}/${encodeURIComponent(
+    repo
+  )}/${encodeURIComponent(branch)}/${indexPath}`
 
+  let indexContent = ''
   try {
-    const resp = await fetch(url, {
+    const resp = await fetch(indexUrl, {
       headers: {
-        Accept: 'application/vnd.github+json',
         'User-Agent': 'UptimeFlare-Maintenance',
       },
     })
     if (!resp.ok) {
-      console.error('Failed to load maintenance list from GitHub:', resp.status, url)
+      console.error('Failed to load maintenance index from GitHub raw:', resp.status, indexUrl)
       return []
     }
-    const data = (await resp.json()) as GitHubContentItem[] | any
-    if (!Array.isArray(data)) return []
-    return data.filter(
-      (item) =>
-        item.type === 'file' &&
-        typeof item.name === 'string' &&
-        item.name.toLowerCase().endsWith('.md')
-    )
+    indexContent = await resp.text()
   } catch (err) {
-    console.error('Error fetching maintenance list from GitHub:', err)
+    console.error('Error fetching maintenance index from GitHub raw:', err)
     return []
   }
-}
 
-async function fetchMaintenancesFromGithubOnce(): Promise<MaintenanceConfig[]> {
-  const files = await fetchGitHubMaintenanceFiles()
+  const filePaths: string[] = []
+  for (const lineRaw of indexContent.split(/\r?\n/)) {
+    let line = lineRaw.trim()
+    if (!line || line.startsWith('#')) continue
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      line = line.slice(2).trim()
+    }
+    if (!line) continue
+    if (!line.toLowerCase().endsWith('.md')) continue
+
+    // 相对路径：基于 index 所在目录
+    const fullPath =
+      indexDir && !line.includes('/') ? `${indexDir}/${line}` : line
+    filePaths.push(fullPath)
+  }
+
   const maintenances: MaintenanceConfig[] = []
 
-  for (const file of files) {
-    if (!file.download_url) continue
+  for (const path of filePaths) {
+    const url = `${RAW_BASE}/${encodeURIComponent(owner)}/${encodeURIComponent(
+      repo
+    )}/${encodeURIComponent(branch)}/${path}`
     try {
-      const resp = await fetch(file.download_url, {
+      const resp = await fetch(url, {
         headers: { 'User-Agent': 'UptimeFlare-Maintenance' },
       })
       if (!resp.ok) continue
       const text = await resp.text()
-      const parsed = parseMaintenanceMarkdown(text, file.name)
+      const fileName = path.split('/').slice(-1)[0]
+      const parsed = parseMaintenanceMarkdown(text, fileName)
       if (parsed) {
         maintenances.push(parsed)
       }

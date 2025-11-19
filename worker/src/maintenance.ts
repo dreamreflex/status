@@ -1,17 +1,10 @@
 import type { MaintenanceConfig } from '../../types/config'
 
-type GitHubContentItem = {
-  name: string
-  path: string
-  type: string
-  download_url?: string
-}
-
 const OWNER = 'dreamreflex'
 const REPO = 'status'
 const BRANCH = 'main'
-const DIR = 'maintenance'
-const API_BASE = 'https://api.github.com'
+const INDEX_PATH = 'maintenance/index.md'
+const RAW_BASE = 'https://raw.githubusercontent.com'
 
 function parseFrontMatterWorker(
   raw: string
@@ -138,51 +131,66 @@ function parseMaintenanceMarkdownWorker(
   return maintenance
 }
 
-async function fetchGitHubMaintenanceFilesWorker(): Promise<GitHubContentItem[]> {
-  const url = `${API_BASE}/repos/${encodeURIComponent(
-    OWNER
-  )}/${encodeURIComponent(REPO)}/contents/${encodeURIComponent(
-    DIR
-  )}?ref=${encodeURIComponent(BRANCH)}`
+async function fetchMaintenancesFromGithubOnceWorker(): Promise<MaintenanceConfig[]> {
+  const indexUrl = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
+    REPO
+  )}/${encodeURIComponent(BRANCH)}/${INDEX_PATH}`
 
+  let indexContent = ''
   try {
-    const resp = await fetch(url, {
+    const resp = await fetch(indexUrl, {
       headers: {
-        Accept: 'application/vnd.github+json',
         'User-Agent': 'UptimeFlare-Maintenance-Worker',
       },
     })
     if (!resp.ok) {
-      console.log('Failed to load maintenance list from GitHub (worker):', resp.status, url)
+      console.log(
+        'Failed to load maintenance index from GitHub raw (worker):',
+        resp.status,
+        indexUrl
+      )
       return []
     }
-    const data = (await resp.json()) as GitHubContentItem[] | any
-    if (!Array.isArray(data)) return []
-    return data.filter(
-      (item) =>
-        item.type === 'file' &&
-        typeof item.name === 'string' &&
-        item.name.toLowerCase().endsWith('.md')
-    )
+    indexContent = await resp.text()
   } catch (err) {
-    console.log('Error fetching maintenance list from GitHub (worker):', err)
+    console.log('Error fetching maintenance index from GitHub raw (worker):', err)
     return []
   }
-}
 
-async function fetchMaintenancesFromGithubOnceWorker(): Promise<MaintenanceConfig[]> {
-  const files = await fetchGitHubMaintenanceFilesWorker()
+  const indexDir =
+    INDEX_PATH.lastIndexOf('/') >= 0
+      ? INDEX_PATH.slice(0, INDEX_PATH.lastIndexOf('/'))
+      : ''
+
+  const filePaths: string[] = []
+  for (const lineRaw of indexContent.split(/\r?\n/)) {
+    let line = lineRaw.trim()
+    if (!line || line.startsWith('#')) continue
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      line = line.slice(2).trim()
+    }
+    if (!line) continue
+    if (!line.toLowerCase().endsWith('.md')) continue
+
+    const fullPath =
+      indexDir && !line.includes('/') ? `${indexDir}/${line}` : line
+    filePaths.push(fullPath)
+  }
+
   const maintenances: MaintenanceConfig[] = []
 
-  for (const file of files) {
-    if (!file.download_url) continue
+  for (const path of filePaths) {
+    const url = `${RAW_BASE}/${encodeURIComponent(OWNER)}/${encodeURIComponent(
+      REPO
+    )}/${encodeURIComponent(BRANCH)}/${path}`
     try {
-      const resp = await fetch(file.download_url, {
+      const resp = await fetch(url, {
         headers: { 'User-Agent': 'UptimeFlare-Maintenance-Worker' },
       })
       if (!resp.ok) continue
       const text = await resp.text()
-      const parsed = parseMaintenanceMarkdownWorker(text, file.name)
+      const fileName = path.split('/').slice(-1)[0]
+      const parsed = parseMaintenanceMarkdownWorker(text, fileName)
       if (parsed) {
         maintenances.push(parsed)
       }
