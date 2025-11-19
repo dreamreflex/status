@@ -18,6 +18,9 @@ export type MaintenanceConfig = {
   start: number | string
   end?: number | string
   color?: string
+  status?: string
+  type?: string
+  id?: string
 }
 
 export type PageConfigGroup = { [key: string]: string[] }

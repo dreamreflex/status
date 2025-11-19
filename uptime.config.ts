@@ -1,12 +1,17 @@
 import { MaintenanceConfig, PageConfig, WorkerConfig } from './types/config'
+
 const pageConfig: PageConfig = {
-  title: "云梦镜像状态",
+  title: '云梦镜像状态',
   links: [
     { link: 'https://dreamreflex.com', label: '官网' },
-    { link: 'https://github.com/dreamreflex/status/wiki/History-Maintenance-Event', label: '历史维护'},
+    {
+      link: 'https://github.com/dreamreflex/status/wiki/History-Maintenance-Event',
+      label: '历史维护',
+    },
     { link: 'mailto:status@dreamreflex.com', label: '报告问题', highlight: true },
   ],
 }
+
 const workerConfig: WorkerConfig = {
   monitors: [
     {
@@ -54,45 +59,17 @@ const workerConfig: WorkerConfig = {
       name: '公钥基础设施在线服务',
       method: 'GET',
       target: 'https://pki.dreamreflex.com/api/v1/ca',
-      tooltip: 'CSA客户服务应用网站的运行状态',
+      tooltip: '公钥基础设施在线服务的运行状态',
       statusPageLink: 'https://pki.dreamreflex.com/api/v1/ca',
       expectedCodes: [200],
       timeout: 10000,
-    }
-  ]
+    },
+  ],
 }
-const maintenances: MaintenanceConfig[] = [
-    {
-    monitors: ['dreamreflex_doc'],
-    title: '站点缓存维护-降级',
-    body: '文档站点因缓存维护降级',
-    start: '2025-11-07T00:20:00+08:00',
-    end: '2025-11-07T00:22:00+08:00',
-    color: 'blue',
-  },
-  {
-    monitors: ['dreamreflex_api'],
-    title: 'API安全升级',
-    body: '处理了披露出来的CVE安全告警，将会对项目进行安全升级',
-    start: '2025-11-08T15:00:00+08:00',
-    end:   '2025-11-08T17:00:00+08:00',
-    color: 'blue',
-  },
-    {
-    monitors: ['dreamreflex_api'],
-    title: 'API功能升级',
-    body: '升级API能力与CSA服务适配，将会在迁移过程中出现不可用的情况',
-    start: '2025-11-09T14:00:00+08:00',
-    end:   '2025-11-09T14:15:00+08:00',
-    color: 'blue',
-  },
-   {
-    monitors: ['dreamreflex_api'],
-    title: 'API功能升级',
-    body: '升级API的公钥基础设施能力和OAuth标准流程认证能力，对API加入异构零信任网络进行封闭测试和合规检验，此次维护期间PKI，IaS平台将不可用，预计升级于2025年11月18日结束。',
-    start: '2025-11-13T20:00:00+08:00',
-    end:   '2025-11-18T18:15:00+08:00',
-    color: 'blue',
-  }
-]
+
+// 维护事件改为由 /maintenance 目录中的 Markdown 驱动
+// 这里保留空数组仅用于类型和 Worker 回退逻辑
+const maintenances: MaintenanceConfig[] = []
+
 export { maintenances, pageConfig, workerConfig }
+

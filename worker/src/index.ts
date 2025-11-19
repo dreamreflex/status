@@ -3,6 +3,7 @@ import { MonitorState, MonitorTarget } from '../../types/config'
 import { maintenances, workerConfig } from '../../uptime.config'
 import { getStatus, getStatusWithGlobalPing } from './monitor'
 import { formatStatusChangeNotification, getWorkerLocation, webhookNotify } from './util'
+import { getMaintenancesFromGithubForWorker } from './maintenance'
 
 export interface Env {
   UPTIMEFLARE_STATE: KVNamespace
@@ -13,6 +14,10 @@ const Worker = {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     const workerLocation = (await getWorkerLocation()) || 'ERROR'
     console.log(`Running scheduled event on ${workerLocation}...`)
+
+    const remoteMaintenances = await getMaintenancesFromGithubForWorker()
+    const maintenanceSource =
+      remoteMaintenances.length > 0 ? remoteMaintenances : maintenances
 
     // Auxiliary function to format notification and send it via webhook
     let formatAndNotify = async (
@@ -32,7 +37,7 @@ const Worker = {
       }
 
       // Skip notification if monitor is in maintenance
-      const maintenanceList = maintenances
+      const maintenanceList = maintenanceSource
         .filter(
           (m) =>
             new Date(timeNow * 1000) >= new Date(m.start) &&

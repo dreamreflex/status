@@ -2,18 +2,23 @@ import Head from 'next/head'
 
 import { Inter } from 'next/font/google'
 import { MaintenanceConfig, MonitorTarget } from '@/types/config'
-import { maintenances, pageConfig, workerConfig } from '@/uptime.config'
+import { pageConfig, workerConfig } from '@/uptime.config'
 import Header from '@/components/Header'
 import { Box, Button, Center, Container, Group, Select } from '@mantine/core'
 import Footer from '@/components/Footer'
 import { useEffect, useState } from 'react'
 import MaintenanceAlert from '@/components/MaintenanceAlert'
 import NoIncidentsAlert from '@/components/NoIncidents'
+import { getMaintenancesFromGithub } from '@/util/maintenance'
 
 export const runtime = 'experimental-edge'
 const inter = Inter({ subsets: ['latin'] })
 
 function getSelectedMonth() {
+  if (typeof window === 'undefined') {
+    const now = new Date()
+    return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0')
+  }
   const hash = window.location.hash.replace('#', '')
   if (!hash) {
     const now = new Date()
@@ -54,12 +59,30 @@ function getPrevNextMonth(monthStr: string) {
 
 export default function IncidentsPage() {
   const [selectedMonitor, setSelectedMonitor] = useState<string | null>('')
+  const [maintenances, setMaintenances] = useState<MaintenanceConfig[]>([])
   const [selectedMonth, setSelectedMonth] = useState(getSelectedMonth())
 
   useEffect(() => {
     const onHashChange = () => setSelectedMonth(getSelectedMonth())
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const data = await getMaintenancesFromGithub()
+        if (!cancelled) {
+          setMaintenances(data)
+        }
+      } catch (e) {
+        console.error('Failed to load maintenances from GitHub', e)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const filteredIncidents = filterIncidentsByMonth(maintenances, selectedMonth)

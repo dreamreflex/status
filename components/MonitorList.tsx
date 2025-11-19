@@ -1,4 +1,4 @@
-import { MonitorState, MonitorTarget } from '@/types/config'
+import { MaintenanceConfig, MonitorState, MonitorTarget } from '@/types/config'
 import { Accordion, Card, Center, Text } from '@mantine/core'
 import MonitorDetail from './MonitorDetail'
 import { pageConfig } from '@/uptime.config'
@@ -35,6 +35,7 @@ export default function MonitorList({
 }: {
   monitors: MonitorTarget[]
   state: MonitorState
+  maintenances?: MaintenanceConfig[]
 }) {
   const group = pageConfig.group
   const groupedMonitor = group && Object.keys(group).length > 0
@@ -92,7 +93,11 @@ export default function MonitorList({
                 .map((monitor) => (
                   <div key={monitor.id}>
                     <Card.Section ml="xs" mr="xs">
-                      <MonitorDetail monitor={monitor} state={state} />
+                      <MonitorDetail
+                        monitor={monitor}
+                        state={state}
+                        maintenances={maintenances}
+                      />
                     </Card.Section>
                   </div>
                 ))}
@@ -106,7 +111,7 @@ export default function MonitorList({
     content = monitors.map((monitor) => (
       <div key={monitor.id}>
         <Card.Section ml="xs" mr="xs">
-          <MonitorDetail monitor={monitor} state={state} />
+          <MonitorDetail monitor={monitor} state={state} maintenances={maintenances} />
         </Card.Section>
       </div>
     ))
