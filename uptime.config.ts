@@ -38,7 +38,7 @@ const workerConfig: WorkerConfig = {
       id: 'dreamreflex_api',
       name: 'OpenAPI网关',
       method: 'GET',
-      target: 'https://api.dreamreflex.com/docs',
+      target: 'https://api.dreamreflex.com/openapi.json',
       tooltip: 'OpenAPI网关服务的运行状态',
       statusPageLink: 'https://api.dreamreflex.com',
       expectedCodes: [200],
