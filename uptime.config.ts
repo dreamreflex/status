@@ -60,10 +60,20 @@ const workerConfig: WorkerConfig = {
       method: 'GET',
       target: 'https://pki.dreamreflex.com/api/v1/ca',
       tooltip: '公钥基础设施在线服务的运行状态',
-      statusPageLink: 'https://pki.dreamreflex.com/api/v1/ca',
+      statusPageLink: 'https://pki.dreamreflex.com',
       expectedCodes: [200],
       timeout: 10000,
     },
+    {
+      id: 'dreamreflex_git',
+      name: '代码基础设施',
+      method: 'GET',
+      target: 'https://git.dreamreflex.com',
+      tooltip: '代码托管平台',
+      statusPageLink: 'https://git.dreamreflex.com',
+      expectedCodes: [200],
+      timeout: 10000,
+    }
   ],
 }
 
