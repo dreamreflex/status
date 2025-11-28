@@ -35,16 +35,6 @@ const workerConfig: WorkerConfig = {
       timeout: 10000,
     },
     {
-      id: 'dreamreflex_api',
-      name: 'OpenAPI网关',
-      method: 'GET',
-      target: 'https://api.dreamreflex.com/openapi.json',
-      tooltip: 'OpenAPI网关服务的运行状态',
-      statusPageLink: 'https://api.dreamreflex.com',
-      expectedCodes: [200],
-      timeout: 10000,
-    },
-    {
       id: 'dreamreflex_doc',
       name: '官方文档',
       method: 'GET',
@@ -64,6 +54,7 @@ const workerConfig: WorkerConfig = {
       expectedCodes: [200],
       timeout: 10000,
     },
+    /*
     {
       id: 'dreamreflex_git',
       name: '代码基础设施',
@@ -73,7 +64,17 @@ const workerConfig: WorkerConfig = {
       statusPageLink: 'https://git.dreamreflex.com',
       expectedCodes: [200],
       timeout: 10000,
-    }
+    },
+    {
+      id: 'dreamreflex_api',
+      name: 'OpenAPI网关',
+      method: 'GET',
+      target: 'https://api.dreamreflex.com/openapi.json',
+      tooltip: 'OpenAPI网关服务的运行状态',
+      statusPageLink: 'https://api.dreamreflex.com',
+      expectedCodes: [200],
+      timeout: 10000,
+    },*/
   ],
 }
 
