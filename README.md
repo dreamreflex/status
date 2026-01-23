@@ -1,4 +1,7 @@
 # Dream Reflex status monitor
+# 归档说明
+
+自2026年1月25日起，该项目仓库不再维护，原有的状态页面由“云梦镜像拨测中心”取代，不再使用Serverless架构进行服务探测
 
 ## Open Source
 
